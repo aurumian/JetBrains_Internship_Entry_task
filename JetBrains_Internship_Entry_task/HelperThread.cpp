@@ -34,10 +34,7 @@ wxThread::ExitCode HelperThread::Entry() {
 				dictChecker->Reset();
 				dictChecker->SetWordToCheck(msg.searchStr);
 				searchStr = msg.searchStr;
-				/*if (msg.searchStr.empty())
-					working = false;
-				else*/
-					working = true;
+				working = true;
 				matchedCount = 0;
 				totalMatchedCount = 0;
 				results.Clear();
@@ -51,9 +48,7 @@ wxThread::ExitCode HelperThread::Entry() {
 			break;
 
 		if (!working)
-			continue;
-			
-
+			continue;	
 
 		// if the dictionary word fits add it to results
 		bool wordAdded = dictChecker->CheckNext(results);

@@ -68,53 +68,20 @@ public:
 
 	typedef char buffer_type_t;
 
-	WordDictionary(wxString filename) {
-		FILE* in;
-		fopen_s(&in, filename, "rb");
+	WordDictionary(const wxString& filename);
 
-		fread(&chars, sizeof(chars[0]), BUFFER_SIZE, in);
+	const buffer_type_t* GetNewLineDelimitedString(OffsetArray::offset_t offset);
 
-		fclose(in);
-	}
+	wxString GetString(OffsetArray::offset_t offset);
 
-	const buffer_type_t* GetNewLineDelimitedString(OffsetArray::offset_t offset) {
-		return chars + offset;
-	}
+	void AppendPBString(PartiallyBoldString& out, OffsetArray::offset_t offset, OffsetArray::offset_t boldLen);
 
-	wxString GetString(OffsetArray::offset_t offset) {
-		return wxString(GetPtrOf(chars + offset, '\n', false) + 1, GetPtrOf(chars + offset, '\n'));
-	}
+	int StrCmpAInB(const buffer_type_t* a, const buffer_type_t* b);
 
-	int StrCmpAInB(const buffer_type_t* a ,const buffer_type_t* b) {
-		int res = 0;
-		size_t i = 0;
-		while (!IsDelimiter(a[i]) &&
-			!IsDelimiter(b[i])) {
-			if (a[i] != b[i])
-				return a[i] - b[i];
-			++i;
-		}
-		if (IsDelimiter(a[i]) && !IsDelimiter(b[i]))
-			return 0;
-		else if (IsDelimiter(b[i]) && !IsDelimiter(a[i]))
-			return 1;
-		return 0;
-	}
-
-	bool IsDelimiter(wchar_t c) {
-		return c == '\0' || c == '\n';
-	}
+	bool IsDelimiter(wchar_t c);
 
 protected:
 	char chars[BUFFER_SIZE];
 
-	buffer_type_t* GetPtrOf(buffer_type_t* from, buffer_type_t c, bool forward = true) {
-		
-		while (from >= chars && from < (chars + BUFFER_SIZE) && *from != c)
-			if (forward)
-				from++;
-			else
-				from--;
-		return from;
-	}
+	buffer_type_t* GetPtrOf(buffer_type_t* from, buffer_type_t c, bool forward = true);
 };

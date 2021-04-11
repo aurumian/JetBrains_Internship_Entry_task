@@ -85,11 +85,11 @@ bool DictionaryWordChecker::CheckNext(PartiallyBoldString& outBStr)
 
 	if (foundWordOffsetIndex == -1) {
 		foundWordOffsetIndex = FindWord(word);
-		forwardOffsetIndex = foundWordOffsetIndex;
 		if (foundWordOffsetIndex != -1)
 		{
+			forwardOffsetIndex = foundWordOffsetIndex;
 			backOffsetIndex = foundWordOffsetIndex;
-			outBStr.AppendNormal(dict->GetString(offsetArray->GetOffset(foundWordOffsetIndex)));
+			dict->AppendPBString(outBStr, offsetArray->GetOffset(foundWordOffsetIndex), word.size());
 			return true;
 		}
 		else {
@@ -103,7 +103,7 @@ bool DictionaryWordChecker::CheckNext(PartiallyBoldString& outBStr)
 		--backOffsetIndex;
 		if (CheckStrWithOffset(backOffsetIndex))
 		{
-			outBStr.AppendNormal(dict->GetString(offsetArray->GetOffset(backOffsetIndex)));
+			dict->AppendPBString(outBStr, offsetArray->GetOffset(backOffsetIndex), word.size());
 			return true;
 		}
 		else 
@@ -117,7 +117,7 @@ bool DictionaryWordChecker::CheckNext(PartiallyBoldString& outBStr)
 		++forwardOffsetIndex;
 		if (CheckStrWithOffset(forwardOffsetIndex))
 		{
-			outBStr.AppendNormal(dict->GetString(offsetArray->GetOffset(forwardOffsetIndex)));
+			dict->AppendPBString(outBStr, offsetArray->GetOffset(forwardOffsetIndex), word.size());
 			return true;
 		}
 		else
@@ -152,4 +152,58 @@ OffsetArray::offset_t OffsetArray::GetOffset(size_t index)
 OffsetArray::offset_t OffsetArray::GetNumOffsets()
 {
 	return numOffsets;
+}
+
+WordDictionary::WordDictionary(const wxString& filename)
+{
+	FILE* in;
+	fopen_s(&in, filename, "rb");
+
+	fread(&chars, sizeof(chars[0]), BUFFER_SIZE, in);
+
+	fclose(in);
+}
+
+const WordDictionary::buffer_type_t* WordDictionary::GetNewLineDelimitedString(OffsetArray::offset_t offset) {
+	return chars + offset;
+}
+
+wxString WordDictionary::GetString(OffsetArray::offset_t offset) {
+	return wxString(GetPtrOf(chars + offset, '\n', false) + 1, GetPtrOf(chars + offset, '\n'));
+}
+
+void WordDictionary::AppendPBString(PartiallyBoldString& out, OffsetArray::offset_t offset, OffsetArray::offset_t boldLen) {
+	out.AppendNormal(wxString(GetPtrOf(chars + offset, '\n', false) + 1, chars + offset));
+	out.AppendBold(wxString(chars + offset, chars + offset + boldLen));
+	out.AppendNormal(wxString(chars + offset + boldLen, GetPtrOf(chars + offset, '\n')));
+}
+
+int WordDictionary::StrCmpAInB(const buffer_type_t* a, const buffer_type_t* b) {
+	int res = 0;
+	size_t i = 0;
+	while (!IsDelimiter(a[i]) &&
+		!IsDelimiter(b[i])) {
+		if (a[i] != b[i])
+			return a[i] - b[i];
+		++i;
+	}
+	if (IsDelimiter(a[i]) && !IsDelimiter(b[i]))
+		return 0;
+	else if (IsDelimiter(b[i]) && !IsDelimiter(a[i]))
+		return 1;
+	return 0;
+}
+
+bool WordDictionary::IsDelimiter(wchar_t c) {
+	return c == '\0' || c == '\n';
+}
+
+WordDictionary::buffer_type_t* WordDictionary::GetPtrOf(buffer_type_t* from, buffer_type_t c, bool forward) {
+
+	while (from >= chars && from < (chars + BUFFER_SIZE) && *from != c)
+		if (forward)
+			from++;
+		else
+			from--;
+	return from;
 }

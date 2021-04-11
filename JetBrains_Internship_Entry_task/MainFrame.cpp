@@ -74,7 +74,7 @@ void MainFrame::OnHelperThreadFoundMatch(wxThreadEvent& event)
 	HideSearchIsInProgress();
 
 	wxString str = event.GetString();
-	/*PartiallyBoldString bs(str);
+	PartiallyBoldString bs(str);
 	while (bs.CanGetNextPart())
 	{
 		bool isBold = bs.IsNextPartBold();
@@ -88,8 +88,7 @@ void MainFrame::OnHelperThreadFoundMatch(wxThreadEvent& event)
 		if (isBold)
 			outField->EndBold();
 
-	}*/
-	outField->WriteText(str);
+	}
 	outField->WriteText(RESULTS_DELIMITER);
 
 	ShowSearchIsInProgress();
