@@ -6,8 +6,6 @@
 
 DictionaryWordChecker::DictionaryWordChecker(const wxString& filepath, const wxString& suffixArrayFilepath)
 {
-	//fstream = new wxFileInputStream(filepath);
-	//dictStream = new wxTextInputStream(*fstream);
 	offsetArray = new OffsetArray(suffixArrayFilepath);
 	dict = new WordDictionary(filepath);
 	foundWordOffsetIndex = -1;
@@ -128,6 +126,8 @@ bool DictionaryWordChecker::CheckNext(PartiallyBoldString& outBStr)
 			return false;
 		}
 	}
+
+	return false;
 }
 
 

@@ -10,8 +10,8 @@ wxDEFINE_EVENT(wxEVT_HELPER_THREAD_DONE, wxThreadEvent);
 namespace {
 	const wxString DICTIONARY_FILEPATH = wxT("Resource\\words.txt");
 	const wxString DICTIONARY_SUFFIXARRAY_FILEPATH = wxT("Resource\\words.suffixarray");
-	const int MAX_NUM_RESULTS = 50;
-	const int MAX_NUM_RESULTS_PER_MESSAGE = 20;
+	const int MAX_NUM_RESULTS = 10000;
+	const int MAX_NUM_RESULTS_PER_MESSAGE = 10;
 }
 
 
@@ -53,43 +53,38 @@ wxThread::ExitCode HelperThread::Entry() {
 		if (!working)
 			continue;
 			
-		bool done = dictChecker->CheckedAll() || totalMatchedCount == MAX_NUM_RESULTS;
 
-		// if the dictionary word fits, notify the main thread
-		if (dictChecker->CheckNext(results)) 
+
+		// if the dictionary word fits add it to results
+		bool wordAdded = dictChecker->CheckNext(results);
+		if (totalMatchedCount < MAX_NUM_RESULTS && wordAdded)
 		{
 			matchedCount++;
 			totalMatchedCount++;
 			if (matchedCount < MAX_NUM_RESULTS_PER_MESSAGE)
 				results.AppendNormal(RESULTS_DELIMITER);
 		}
+
+		bool done = dictChecker->CheckedAll() || totalMatchedCount == MAX_NUM_RESULTS;
 		
-		if (matchedCount >= MAX_NUM_RESULTS_PER_MESSAGE || done ) 
+		if (matchedCount >= MAX_NUM_RESULTS_PER_MESSAGE || done && matchedCount > 0) 
 		{
 			wxThreadEvent evt(wxEVT_HELPER_THREAD_FOUND_MATCH);
 			evt.SetString(results.GetString());
 			wxQueueEvent(mainFrame, evt.Clone());
 			matchedCount = 0;
+			results.Clear();
 		}
 
 		// if done, notify the main thread
 		if (done)
 		{
-			wxThreadEvent evt;
-			wxQueueEvent(mainFrame, new  wxThreadEvent(wxEVT_HELPER_THREAD_DONE));
-			working = false;
-		}
-
-
-		
-		/*wxString res;
-		if (dictChecker->FindWord(searchStr, res))
-		{
-			wxThreadEvent evt(wxEVT_HELPER_THREAD_FOUND_MATCH);
-			evt.SetString(res);
+			wxThreadEvent evt(wxEVT_HELPER_THREAD_DONE);
+			// if we stopped because of the limit we should propagte the info to MainFrame
+			evt.SetInt(dictChecker->CheckedAll());
 			wxQueueEvent(mainFrame, evt.Clone());
 			working = false;
-		}*/
+		}
 
 		wxMilliSleep(100);
 
