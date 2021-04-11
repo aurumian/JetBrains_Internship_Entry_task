@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="DictionaryWordChecker.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="HelperThread.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="JetBrains_Internship_Entry_task.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="MainFrame.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="PartiallyBoldString.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="DictionaryWordChecker.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="HelperThread.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="JetBrains_Internship_Entry_task.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="MainFrame.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="PartiallyBoldString.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Headers">
+      <UniqueIdentifier>{e9e2ce68-a838-4c3e-9f9d-9e9104e963cb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{e9378fd7-2362-4b30-9cda-27aa71eb1e05}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource">
+      <UniqueIdentifier>{cc9eba31-6f1b-496c-b01d-02bf56862de1}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Resource\words.txt">
+      <Filter>Resource</Filter>
+    </Text>
+  </ItemGroup>
+</Project>
