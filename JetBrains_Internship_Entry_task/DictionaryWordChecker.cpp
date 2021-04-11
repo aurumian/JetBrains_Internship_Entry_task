@@ -45,7 +45,7 @@ ssize_t DictionaryWordChecker::FindWord(const wxString& word) {
 
 	auto* w = word.c_str().AsChar();
 	if (dict->IsDelimiter(*w))
-		return false;
+		return -1;
 	while (start != end) {
 		size_t mid = (start + end) / 2;
 		auto offset = offsetArray->GetOffset(mid);
@@ -88,13 +88,17 @@ bool DictionaryWordChecker::CheckNext(PartiallyBoldString& outBStr)
 	if (foundWordOffsetIndex == -1) {
 		foundWordOffsetIndex = FindWord(word);
 		forwardOffsetIndex = foundWordOffsetIndex;
-		backOffsetIndex = foundWordOffsetIndex;
-		outBStr.AppendNormal(dict->GetString(offsetArray->GetOffset(foundWordOffsetIndex)));
-		return true;
-	}
-
-	if (foundWordOffsetIndex == -1) {
-		return false;
+		if (foundWordOffsetIndex != -1)
+		{
+			backOffsetIndex = foundWordOffsetIndex;
+			outBStr.AppendNormal(dict->GetString(offsetArray->GetOffset(foundWordOffsetIndex)));
+			return true;
+		}
+		else {
+			checkedAllBack = true;
+			checkedAllForward = true;
+			return false;
+		}
 	}
 
 	if (!checkedAllBack) {

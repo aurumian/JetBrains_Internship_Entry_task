@@ -10,6 +10,8 @@ wxDEFINE_EVENT(wxEVT_HELPER_THREAD_DONE, wxThreadEvent);
 namespace {
 	const wxString DICTIONARY_FILEPATH = wxT("Resource\\words.txt");
 	const wxString DICTIONARY_SUFFIXARRAY_FILEPATH = wxT("Resource\\words.suffixarray");
+	const int MAX_NUM_RESULTS = 50;
+	const int MAX_NUM_RESULTS_PER_MESSAGE = 20;
 }
 
 
@@ -51,28 +53,33 @@ wxThread::ExitCode HelperThread::Entry() {
 		if (!working)
 			continue;
 			
-		
-		// if done notify the main thread
-		if (dictChecker->CheckedAll() || totalMatchedCount == 100) {
-			wxThreadEvent evt;
-			wxQueueEvent(mainFrame, new  wxThreadEvent(wxEVT_HELPER_THREAD_DONE));
-			working = false;
-		}
+		bool done = dictChecker->CheckedAll() || totalMatchedCount == MAX_NUM_RESULTS;
 
 		// if the dictionary word fits, notify the main thread
-		if (dictChecker->CheckNext(results)) {
+		if (dictChecker->CheckNext(results)) 
+		{
 			matchedCount++;
 			totalMatchedCount++;
-			if (matchedCount < 10)
+			if (matchedCount < MAX_NUM_RESULTS_PER_MESSAGE)
 				results.AppendNormal(RESULTS_DELIMITER);
 		}
 		
-		if (matchedCount >= 10) {
+		if (matchedCount >= MAX_NUM_RESULTS_PER_MESSAGE || done ) 
+		{
 			wxThreadEvent evt(wxEVT_HELPER_THREAD_FOUND_MATCH);
 			evt.SetString(results.GetString());
 			wxQueueEvent(mainFrame, evt.Clone());
 			matchedCount = 0;
 		}
+
+		// if done, notify the main thread
+		if (done)
+		{
+			wxThreadEvent evt;
+			wxQueueEvent(mainFrame, new  wxThreadEvent(wxEVT_HELPER_THREAD_DONE));
+			working = false;
+		}
+
 
 		
 		/*wxString res;
