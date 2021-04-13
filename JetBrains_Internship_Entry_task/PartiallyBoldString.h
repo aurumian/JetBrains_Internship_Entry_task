@@ -23,6 +23,8 @@ public:
 
 	wxString GetString();
 
+	bool IsEmpty();
+
 private:
 
 	bool IsNexPartBoldPrivate();

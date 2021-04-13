@@ -10,8 +10,8 @@ wxDEFINE_EVENT(wxEVT_HELPER_THREAD_DONE, wxThreadEvent);
 namespace {
 	const wxString DICTIONARY_FILEPATH = wxT("Resource\\words.txt");
 	const wxString DICTIONARY_SUFFIXARRAY_FILEPATH = wxT("Resource\\words.suffixarray");
-	const int MAX_NUM_RESULTS = 500;
-	const int MAX_NUM_RESULTS_PER_MESSAGE = 10;
+	const int MAX_NUM_RESULTS = 100000;
+	const int MAX_NUM_RESULTS_PER_MESSAGE = 1;
 }
 
 
@@ -38,6 +38,7 @@ wxThread::ExitCode HelperThread::Entry() {
 				matchedCount = 0;
 				totalMatchedCount = 0;
 				results.Clear();
+				mainFrame->resultsQ.Clear();
 				break;
 			case MsgToHelperThread::MessageType::EXIT:
 				exit = true;
@@ -62,13 +63,22 @@ wxThread::ExitCode HelperThread::Entry() {
 
 		bool done = dictChecker->CheckedAll() || totalMatchedCount == MAX_NUM_RESULTS;
 		
+
+		char c = 0; 
+		if (searchStr.Len() > 0)
+			c = searchStr.GetChar(0);
+		char b = 0;
+		if (searchStr.Len() > 1)
+			searchStr.GetChar(1);
+		
 		if (matchedCount >= MAX_NUM_RESULTS_PER_MESSAGE || done && matchedCount > 0) 
 		{
-			wxThreadEvent evt(wxEVT_HELPER_THREAD_FOUND_MATCH);
-			evt.SetString(results.GetString());
-			wxQueueEvent(mainFrame, evt.Clone());
+			//wxThreadEvent evt(wxEVT_HELPER_THREAD_FOUND_MATCH);
+			//evt.SetString(results.GetString());
+			//wxQueueEvent(mainFrame, evt.Clone());
+			mainFrame->resultsQ.Post(results);
 			// to not send messages to the main thread too often - it has problems working with the messages too fast
-			wxMilliSleep(100 * matchedCount);
+			//wxMilliSleep(100 * matchedCount);
 			matchedCount = 0;
 			results.Clear();
 		}
@@ -82,9 +92,6 @@ wxThread::ExitCode HelperThread::Entry() {
 			wxQueueEvent(mainFrame, evt.Clone());
 			working = false;
 		}
-
-
-
 	}
 
 	return (wxThread::ExitCode)0;

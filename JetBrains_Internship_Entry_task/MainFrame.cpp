@@ -2,6 +2,7 @@
 
 #include "MainFrame.h"
 #include "PartiallyBoldString.h"
+#include "wx/time.h"
 
 // TODO: add pausing/resuming of helper thread
 // TODO: send exit message to helper thread onClose
@@ -10,6 +11,7 @@ namespace {
 	const unsigned long MAX_INPUT_LEN = 30;
 	const int IN_ID = 1;
 	const wxString IN_SEARCH_PROGRESS_STR = wxT(" ...");
+	const int UPDATE_INTERVAL_MILLIS = 50;
 }
 
 MainFrame::MainFrame() :
@@ -28,6 +30,7 @@ MainFrame::MainFrame() :
 		wxDefaultSize, wxVSCROLL);
 	outField->SetEditable(false);
 	outField->GetCaret()->Hide();
+	
 	
 
 	// define layout
@@ -48,16 +51,25 @@ MainFrame::MainFrame() :
 			wxThreadEventHandler(MainFrame::OnHelperThreadFoundMatch));
 		Connect(wxEVT_HELPER_THREAD_DONE,
 			wxThreadEventHandler(MainFrame::OnHelperThreadDone));
+
+		Connect(wxEVT_CLOSE_WINDOW,
+			wxCloseEventHandler(MainFrame::OnClose));
 	}
 
 	// create and start the helper thread
 	helperThread = new HelperThread(this);
 	helperThread->Run();
 
+	// start the timer
+	timer.SetOwner(this);
+	timer.Start(UPDATE_INTERVAL_MILLIS);
+	Connect(wxEVT_TIMER,
+		wxTimerEventHandler(MainFrame::OnTimer));
 }
 
 void MainFrame::OnInputFieldUpdated(wxCommandEvent& event) 
 {
+	helperThreadDone = false;
 	// send a message to the helper thread to start searching
 	HelperThread::MsgToHelperThread msg;
 	msg.searchStr = inField->GetValue();
@@ -66,6 +78,7 @@ void MainFrame::OnInputFieldUpdated(wxCommandEvent& event)
 
 	// clear the outField and show that the search is in progress
 	outField->Clear();
+	currentBs.Clear();
 	ShowSearchIsInProgress();
 }
 
@@ -96,10 +109,11 @@ void MainFrame::OnHelperThreadFoundMatch(wxThreadEvent& event)
 
 void MainFrame::OnHelperThreadDone(wxThreadEvent& event)
 {
-	if (event.GetInt()) {
+	/*if (event.GetInt()) {
 		HideSearchIsInProgress();
 		RemoveLastNCharsFromOut(RESULTS_DELIMITER.size());
-	}
+	}*/
+	helperThreadDone = true;
 }
 
 void MainFrame::RemoveLastNCharsFromOut(size_t n) 
@@ -110,10 +124,71 @@ void MainFrame::RemoveLastNCharsFromOut(size_t n)
 
 void MainFrame::ShowSearchIsInProgress()
 {
-	outField->WriteText(IN_SEARCH_PROGRESS_STR);
+	if (!searchInProgressDisplayed)
+	{
+		outField->WriteText(IN_SEARCH_PROGRESS_STR);
+		searchInProgressDisplayed = true;
+	}
 }
 
 void MainFrame::HideSearchIsInProgress()
 {
-	RemoveLastNCharsFromOut(IN_SEARCH_PROGRESS_STR.length());
+	if (searchInProgressDisplayed)
+	{
+		RemoveLastNCharsFromOut(IN_SEARCH_PROGRESS_STR.length());
+		searchInProgressDisplayed = false;
+	}
+}
+
+void MainFrame::OnTimer(wxTimerEvent& event)
+{
+	auto beginTime = wxGetLocalTimeMillis();
+	HideSearchIsInProgress();
+	bool receivedMsg = false;
+	while ((wxGetLocalTimeMillis() - beginTime).GetLo() < (UPDATE_INTERVAL_MILLIS * 0.5))
+	{
+		bool empty = currentBs.IsEmpty();
+		if (!empty && currentBs.CanGetNextPart()) 
+		{
+			bool isBold = currentBs.IsNextPartBold();
+			if (isBold)
+				outField->BeginBold();
+
+			wxString s;
+			currentBs.GetNextPart(s);
+			outField->WriteText(s);
+
+			if (isBold)
+				outField->EndBold();
+		}
+		else if ((resultsQ.ReceiveTimeout(0, currentBs)) != wxMSGQUEUE_TIMEOUT) 
+		{
+			if (!empty)
+				outField->WriteText(RESULTS_DELIMITER);
+		}
+		else if (!helperThreadDone)
+		{
+			ShowSearchIsInProgress();
+			break;
+		}
+	}
+	
+}
+
+
+void MainFrame::OnClose(wxCloseEvent& evt)
+{
+	timer.Stop();
+	HelperThread::MsgToHelperThread msg;
+	msg.type = HelperThread::MsgToHelperThread::MessageType::EXIT;
+	msgq.Post(msg);
+
+	while (true)
+	{
+		wxCriticalSectionLocker lock(helperThreadCS);
+		if (helperThread == nullptr)
+			break;
+	}
+
+	Destroy();
 }

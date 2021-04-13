@@ -40,10 +40,10 @@
       <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="SuffixArray.h">
-      <Filter>src</Filter>
+      <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="WordDictionary.h">
-      <Filter>src</Filter>
+      <Filter>Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

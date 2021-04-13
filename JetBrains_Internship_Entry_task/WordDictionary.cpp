@@ -54,7 +54,7 @@ int WordDictionary::CmpStrWithSuffix(const buffer_t* str, const buffer_t* suffix
 	}
 	if (IsDelimiter(str[i]) && !IsDelimiter(suffix[i]))
 		return 0;
-	else if (IsDelimiter(str[i]) && !IsDelimiter(suffix[i]))
+	else if (IsDelimiter(suffix[i]) && !IsDelimiter(str[i]))
 		return 1;
 	return 0;
 }

@@ -1,3 +1,4 @@
+
 #include "PartiallyBoldString.h"
 
 namespace {
@@ -73,4 +74,8 @@ bool PartiallyBoldString::IsNexPartBoldPrivate()
 wxString PartiallyBoldString::GetString()
 {
 	return string;
+}
+
+bool PartiallyBoldString::IsEmpty() {
+	return string.empty();
 }

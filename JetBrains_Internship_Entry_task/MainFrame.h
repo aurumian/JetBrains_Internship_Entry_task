@@ -13,6 +13,8 @@ class MainFrame : public wxFrame
 public:
 	MainFrame();
 
+	void OnClose(wxCloseEvent& evt);
+
 private:
 	
 	void OnInputFieldUpdated(wxCommandEvent& event);
@@ -25,13 +27,20 @@ private:
 	void ShowSearchIsInProgress();
 	void HideSearchIsInProgress();
 
+	void OnTimer(wxTimerEvent& event);
+
 	wxTextCtrl* inField;
 	wxRichTextCtrl* outField;
 
 	wxMessageQueue<HelperThread::MsgToHelperThread> msgq;
-	wxCriticalSection helperThreadCS;
 	HelperThread* helperThread;
+	wxCriticalSection helperThreadCS;
+	wxMessageQueue<PartiallyBoldString> resultsQ;
+	bool helperThreadDone = true;
+	bool searchInProgressDisplayed = false;
+	PartiallyBoldString currentBs;
+
+	wxTimer timer;
 
 	friend class HelperThread;
 };
-
