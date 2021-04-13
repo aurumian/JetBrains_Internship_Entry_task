@@ -147,6 +147,8 @@
     <ClInclude Include="JetBrains_Internship_Entry_task.h" />
     <ClInclude Include="MainFrame.h" />
     <ClInclude Include="PartiallyBoldString.h" />
+    <ClInclude Include="SuffixArray.h" />
+    <ClInclude Include="WordDictionary.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DictionaryWordChecker.cpp" />
@@ -154,6 +156,8 @@
     <ClCompile Include="JetBrains_Internship_Entry_task.cpp" />
     <ClCompile Include="MainFrame.cpp" />
     <ClCompile Include="PartiallyBoldString.cpp" />
+    <ClCompile Include="SuffixArray.cpp" />
+    <ClCompile Include="WordDictionary.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Resource\words.txt" />

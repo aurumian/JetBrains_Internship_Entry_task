@@ -10,7 +10,7 @@ wxDEFINE_EVENT(wxEVT_HELPER_THREAD_DONE, wxThreadEvent);
 namespace {
 	const wxString DICTIONARY_FILEPATH = wxT("Resource\\words.txt");
 	const wxString DICTIONARY_SUFFIXARRAY_FILEPATH = wxT("Resource\\words.suffixarray");
-	const int MAX_NUM_RESULTS = 10000;
+	const int MAX_NUM_RESULTS = 500;
 	const int MAX_NUM_RESULTS_PER_MESSAGE = 10;
 }
 
@@ -67,6 +67,8 @@ wxThread::ExitCode HelperThread::Entry() {
 			wxThreadEvent evt(wxEVT_HELPER_THREAD_FOUND_MATCH);
 			evt.SetString(results.GetString());
 			wxQueueEvent(mainFrame, evt.Clone());
+			// to not send messages to the main thread too often - it has problems working with the messages too fast
+			wxMilliSleep(100 * matchedCount);
 			matchedCount = 0;
 			results.Clear();
 		}
@@ -81,7 +83,7 @@ wxThread::ExitCode HelperThread::Entry() {
 			working = false;
 		}
 
-		wxMilliSleep(100);
+
 
 	}
 

@@ -16,6 +16,12 @@
     <ClCompile Include="PartiallyBoldString.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="SuffixArray.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="WordDictionary.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DictionaryWordChecker.h">
@@ -32,6 +38,12 @@
     </ClInclude>
     <ClInclude Include="PartiallyBoldString.h">
       <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="SuffixArray.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="WordDictionary.h">
+      <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
