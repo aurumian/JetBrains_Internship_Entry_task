@@ -6,7 +6,6 @@
 #include "PartiallyBoldString.h"
 
 // declare new types of events to send to main thread
-wxDECLARE_EVENT(wxEVT_HELPER_THREAD_FOUND_MATCH, wxThreadEvent);
 wxDECLARE_EVENT(wxEVT_HELPER_THREAD_DONE, wxThreadEvent);
 // TODO: use this event to display error messages
 //wxDECLARE_EVENT(wxEVT_HELPER_THREAD_ERROR, wxThreadEvent);

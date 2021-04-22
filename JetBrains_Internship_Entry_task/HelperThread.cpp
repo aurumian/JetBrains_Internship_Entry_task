@@ -73,12 +73,7 @@ wxThread::ExitCode HelperThread::Entry() {
 		
 		if (matchedCount >= MAX_NUM_RESULTS_PER_MESSAGE || done && matchedCount > 0) 
 		{
-			//wxThreadEvent evt(wxEVT_HELPER_THREAD_FOUND_MATCH);
-			//evt.SetString(results.GetString());
-			//wxQueueEvent(mainFrame, evt.Clone());
 			mainFrame->resultsQ.Post(results);
-			// to not send messages to the main thread too often - it has problems working with the messages too fast
-			//wxMilliSleep(100 * matchedCount);
 			matchedCount = 0;
 			results.Clear();
 		}

@@ -5,7 +5,6 @@
 #include "wx/time.h"
 
 // TODO: add pausing/resuming of helper thread
-// TODO: send exit message to helper thread onClose
 
 namespace {
 	const unsigned long MAX_INPUT_LEN = 30;
@@ -27,11 +26,9 @@ MainFrame::MainFrame() :
 	inField->SetHint(wxT("¬ведите поисковой запрос сюда"));
 	
 	outField = new wxRichTextCtrl(panel, wxID_ANY, wxEmptyString, wxDefaultPosition,
-		wxDefaultSize, wxVSCROLL);
+		wxDefaultSize, wxVSCROLL | wxTE_READONLY);
 	outField->SetEditable(false);
 	outField->GetCaret()->Hide();
-	
-	
 
 	// define layout
 	{
@@ -47,8 +44,6 @@ MainFrame::MainFrame() :
 		Connect(IN_ID, wxEVT_COMMAND_TEXT_UPDATED,
 			wxCommandEventHandler(MainFrame::OnInputFieldUpdated));
 
-		Connect(wxEVT_HELPER_THREAD_FOUND_MATCH,
-			wxThreadEventHandler(MainFrame::OnHelperThreadFoundMatch));
 		Connect(wxEVT_HELPER_THREAD_DONE,
 			wxThreadEventHandler(MainFrame::OnHelperThreadDone));
 
@@ -82,37 +77,8 @@ void MainFrame::OnInputFieldUpdated(wxCommandEvent& event)
 	ShowSearchIsInProgress();
 }
 
-void MainFrame::OnHelperThreadFoundMatch(wxThreadEvent& event) 
-{
-	HideSearchIsInProgress();
-
-	wxString str = event.GetString();
-	PartiallyBoldString bs(str);
-	while (bs.CanGetNextPart())
-	{
-		bool isBold = bs.IsNextPartBold();
-		if (isBold) 
-			outField->BeginBold();
-
-		wxString s;
-		bs.GetNextPart(s);
-		outField->WriteText(s);
-
-		if (isBold)
-			outField->EndBold();
-
-	}
-	outField->WriteText(RESULTS_DELIMITER);
-
-	ShowSearchIsInProgress();
-}
-
 void MainFrame::OnHelperThreadDone(wxThreadEvent& event)
 {
-	/*if (event.GetInt()) {
-		HideSearchIsInProgress();
-		RemoveLastNCharsFromOut(RESULTS_DELIMITER.size());
-	}*/
 	helperThreadDone = true;
 }
 

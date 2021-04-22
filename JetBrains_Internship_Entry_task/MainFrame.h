@@ -19,7 +19,6 @@ private:
 	
 	void OnInputFieldUpdated(wxCommandEvent& event);
 
-	void OnHelperThreadFoundMatch(wxThreadEvent& event);
 	void OnHelperThreadDone(wxThreadEvent& event);
 
 	void RemoveLastNCharsFromOut(size_t n);
